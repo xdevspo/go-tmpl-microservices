@@ -1,0 +1,41 @@
+services:
+  auth-service:
+    build:
+      context: ../
+      dockerfile: docker/auth-service/Dockerfile
+      target: dev
+    volumes:
+      - ../src/auth-service:/app
+      - ../src/auth-service/vendor.protogen:/app/vendor.protogen
+      - ../docker/.air.toml:/app/.air.toml
+      - ../docker/wait-for.sh:/app/wait-for.sh
+    working_dir: /app
+    environment:
+      ENV: dev
+      DB_DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable"
+
+  org-service:
+    build:
+      context: ../
+      dockerfile: docker/org-service/Dockerfile
+      target: dev
+    volumes:
+      - ../src/org-service:/app
+      - ../docker/.air.toml:/app/.air.toml
+      - ../docker/wait-for.sh:/app/wait-for.sh
+    working_dir: /app
+    environment:
+      ENV: dev
+
+  gateway-service:
+    build:
+      context: ../
+      dockerfile: docker/gateway-service/Dockerfile
+      target: dev
+    volumes:
+      - ../src/gateway-service:/app
+      - ../docker/.air.toml:/app/.air.toml
+      - ../docker/wait-for.sh:/app/wait-for.sh
+    working_dir: /app
+    environment:
+      ENV: dev

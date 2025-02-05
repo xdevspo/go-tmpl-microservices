@@ -1,0 +1,4 @@
+tmp/
+.env.dev
+internal/config/.env.test
+internal/config/.env.prod
