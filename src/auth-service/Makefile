@@ -36,3 +36,7 @@ migrate-up:
 migrate-down:
 	set -a && export $$(grep -v '^#' $(ENV_FILE) | xargs) && set +a && \
     migrate -path ./migrations -database "postgres://$$POSTGRES_USER:$$POSTGRES_PASSWORD@$$POSTGRES_HOST:$$POSTGRES_PORT/$$POSTGRES_DB?sslmode=disable" down
+
+.PHONY: init-vendor
+init-vendor:
+	@bash docker/init-vendor.sh
