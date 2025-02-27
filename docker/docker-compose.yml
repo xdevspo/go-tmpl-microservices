@@ -11,18 +11,8 @@ services:
       bash -c '
             apt-get update &&
             apt-get install -y git &&
-            bash docker/init-vendor.sh'
-#      bash -c '
-#      if [ ! -d "src/auth-service/vendor.protogen/validate" ]; then
-#        apt-get update &&
-#        apt-get install -y git &&
-#        mkdir -p src/auth-service/vendor.protogen/validate &&
-#        git clone https://github.com/envoyproxy/protoc-gen-validate tmp_validate &&
-#        cp tmp_validate/validate/*.proto src/auth-service/vendor.protogen/validate/ &&
-#        rm -rf tmp_validate;
-#      else
-#        echo "Directory src/auth-service/vendor.protogen/validate already exists. Skipping initialization.";
-#      fi'
+            bash docker/init-vendor-validate.sh &&
+            bash docker/init-vendor-googleapis.sh'
 
   postgres:
     image: postgres:17.2

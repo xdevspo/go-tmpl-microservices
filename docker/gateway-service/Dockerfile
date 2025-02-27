@@ -6,11 +6,11 @@ FROM golang:1.23.6 AS builder
 WORKDIR /app
 
 # Загружаем зависимости (оптимизированное кеширование)
-COPY src/gateway-service/go.mod src/gateway-service/go.sum ./
+COPY src/auth-service/go.mod src/auth-service/go.sum ./
 RUN go mod download
 
 # Копируем код и собираем бинарник
-COPY src/gateway-service /app
+COPY src/auth-service /app
 RUN go build -o service .
 
 # Stage 2: Runtime (используется в test/prod)
@@ -21,7 +21,7 @@ WORKDIR /app
 COPY --from=builder /app/service /app/service
 
 # Копируем миграции и скрипт ожидания БД
-COPY src/gateway-service/migrations /app/migrations
+COPY src/auth-service/migrations /app/migrations
 
 # Копируем общий `wait-for.sh` из `docker/`
 COPY docker/wait-for.sh /app/wait-for.sh
@@ -34,18 +34,17 @@ CMD ["/app/wait-for.sh", "postgres-${ENV}", "5432", "--", "/app/service", "migra
 FROM golang:1.23.6 AS dev
 WORKDIR /app
 
+# Устанавливаем необходимые системные зависимости
+RUN apt update && apt install -y \
+    protobuf-compiler \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
 # Пакет для .env файлов
 RUN go install github.com/joho/godotenv/cmd/godotenv@v1.5.1
 
-# Копируем миграции и скрипт ожидания БД
-COPY src/gateway-service/migrations /app/migrations
-
-# Копируем общий `wait-for.sh` из `docker/`
-COPY docker/wait-for.sh /app/wait-for.sh
-RUN chmod +x /app/wait-for.sh
-
-# Запускаем сервис с миграциями
-CMD ["/app/wait-for.sh", "postgres-${ENV}", "5432", "--", "/app/service", "migrate", "up", "--database", "DB_DSN"]
+# Экспортируем PATH для доступа к go-бинарникам
+ENV PATH=$PATH:/go/bin
 
 # Устанавливаем `air` через `go install`
 RUN go install github.com/air-verse/air@v1.61.7 && \
@@ -57,3 +56,5 @@ COPY docker/.air.toml /app/.air.toml
 
 # В dev код **не копируем** — он монтируется из локальной машины
 CMD ["air", "-c", ".air.toml"]
+
+

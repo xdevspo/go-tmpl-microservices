@@ -39,4 +39,4 @@ migrate-down:
 
 .PHONY: init-vendor
 init-vendor:
-	@bash docker/init-vendor.sh
+	@bash docker/init-vendor-validate.sh
